@@ -1,0 +1,29 @@
+# Project exclude paths
+/.gradle/
+/Problems/Don't be late again/out/
+/Problems/Don't be late again/out/production/classes/
+/Problems/Groundhogs at a party/out/
+/Problems/Groundhogs at a party/out/production/classes/
+/Problems/How many date-time pairs match the range/out/
+/Problems/How many date-time pairs match the range/out/production/classes/
+/Problems/In the middle of a word/out/
+/Problems/In the middle of a word/out/production/classes/
+/Problems/Is the date between the two other dates/out/
+/Problems/Is the date between the two other dates/out/production/classes/
+/Problems/Return time without seconds/out/
+/Problems/Return time without seconds/out/production/classes/
+/Problems/Seconds between two time points/out/
+/Problems/Seconds between two time points/out/production/classes/
+/Problems/Some hours and minutes ago/out/
+/Problems/Some hours and minutes ago/out/production/classes/
+/Problems/Start or end of a word/out/
+/Problems/Start or end of a word/out/production/classes/
+/Problems/The first and the last day of a month/out/
+/Problems/The first and the last day of a month/out/production/classes/
+/Problems/The last day of a month/out/
+/Problems/The last day of a month/out/production/classes/
+/Problems/The passed hours since the beginning of year/out/
+/Problems/The passed hours since the beginning of year/out/production/classes/
+/Simple Banking System/task/build/
+/Simple Banking System/task/out/
+/Simple Banking System/task/out/production/classes/
