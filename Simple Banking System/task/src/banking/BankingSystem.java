@@ -1,16 +1,29 @@
 package banking;
 
+import org.sqlite.SQLiteDataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class BankingSystem {
 
-    static Scanner scan = new Scanner(System.in);
-    static List<Account> accounts = new ArrayList<>();
+    static Scanner scan;
+    SQLiteDataSource dataSource;
+    Connection con;
+    static String DATABASE_URL;
 
-    public static void run() {
+    public BankingSystem(String database) {
+        scan = new Scanner(System.in);
+        dataSource = new SQLiteDataSource();
+        DATABASE_URL = "jdbc:sqlite:" + database;
+        connectDB(DATABASE_URL);
+    }
 
+    public void run() {
         boolean isExit = false;
 
         while (!isExit) {
@@ -28,36 +41,86 @@ public class BankingSystem {
                     break;
                 case 0:
                     isExit = true;
+                    try {
+                        con.close();
+                    } catch (SQLException e) {
+                        System.out.println("Error at closing connection");
+                        e.printStackTrace();
+                    }
                     System.out.println("\nBye!");
                     break;
             }
         }
     }
 
-    public static void register() {
+    private void connectDB(String url) {
+        dataSource.setUrl(url);
+        try {
+            con = dataSource.getConnection();
+            try (Statement statement = con.createStatement()) {
+                statement.executeUpdate(
+                        "CREATE TABLE IF NOT EXISTS card("+
+                        "id INTEGER PRIMARY KEY," +
+                        "number TEXT," +
+                        "pin TEXT," +
+                        "balance INTEGER DEFAULT 0)");
+            } catch (SQLException e) {
+                System.out.println("Error at query execute");
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error at connection");
+            e.printStackTrace();
+        }
+    }
+
+    private void register() {
         Account newUser = new Account(0, CardGenerator.create());
-        accounts.add(newUser);
+
+            try (Statement statement = con.createStatement()) {
+                statement.executeUpdate(
+                        "INSERT INTO card (number, pin)\n" +
+                                "VALUES('" + newUser.getCard().getNumber() + "', '" + newUser.getCard().getPin() + "')");
+            } catch (SQLException e) {
+                System.out.println("Error at query execute");
+                e.printStackTrace();
+            }
+
         System.out.printf("\nYour card has been created%nYour card number:%n%s%nYour card PIN:%n%s%n", newUser.getCard().getNumber(), newUser.getCard().getPin());
     }
 
-    public static void login() {
+    private void login() {
+        boolean isExists = false;
+        int dbBalance = 0;
+
         System.out.println("Enter your card number:");
         String num = scan.nextLine();
         System.out.println("Enter your PIN:");
         String pin = scan.nextLine();
 
-        Account current = null;
-        boolean isExists = false;
-        for (Account account : accounts) {
-            if (account.getCard().getNumber().equals(num) && account.getCard().getPin().equals(pin)) {
-                current = account;
-                isExists = true;
-                break;
+            try (Statement statement = con.createStatement()) {
+                try (ResultSet existsCards = statement.executeQuery("SELECT * FROM card")) {
+                    while (existsCards.next()) {
+
+                        dbBalance = existsCards.getInt("balance");
+                        String dbNum = existsCards.getString("number");
+                        String dbPin = existsCards.getString("pin");
+
+                        if (num.equals(dbNum) && pin.equals(dbPin)) {
+                            isExists = true;
+                            break;
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                System.out.println("Error at query execute");
+                e.printStackTrace();
             }
-        }
 
         if (isExists) {
+
             System.out.println("You have successfully logged in!");
+
             boolean isLogout = false;
 
             while (!isLogout) {
@@ -67,15 +130,21 @@ public class BankingSystem {
 
                 switch (loginAction) {
                     case 1:
-                        System.out.println(current.getBalance());
+                        System.out.println(dbBalance);
                         break;
                     case 2:
                         System.out.println("\nYou have successfully logged out!");
                         isLogout = true;
                         break;
                     case 0:
+                        try {
+                            con.close();
+                        } catch (SQLException e) {
+                            System.out.println("Error at closing connection");
+                            e.printStackTrace();
+                        }
                         System.out.println("\nBye!");
-                        return;
+                        System.exit(0);
                 }
             }
         } else {
